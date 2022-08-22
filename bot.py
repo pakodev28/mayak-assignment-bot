@@ -5,10 +5,15 @@ import telebot
 from dotenv import load_dotenv
 
 from db import DB
+import logger
+
 
 load_dotenv()
 
+
 bot = telebot.TeleBot(os.environ.get("TOKEN"))
+
+logger = logger.get_logger(__name__)
 
 db = DB()
 
@@ -59,14 +64,19 @@ def document_callback(message: telebot.types.Message):
     try:
         df.to_sql("data_from_users_xls", db.conn, if_exists="append", index=False)
         bot.send_message(message.chat.id, "Данные успешно добавлены в БД!")
-    except:
+    except Exception as e:
+        logger.exception(e)
         bot.send_message(
             message.chat.id, "Что-то пошло не так, данные не были доюавлены в БД!"
         )
 
 
 def run_bot():
-    bot.infinity_polling()
+    logger.debug("Start")
+    try:
+        bot.infinity_polling()
+    except Exception as e:
+        logger.exception(e)
 
 
 run_bot()
