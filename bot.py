@@ -8,6 +8,17 @@ load_dotenv()
 
 bot = telebot.TeleBot(os.environ.get("TOKEN"))
 
+def validate_file_format(message: telebot.types.Message, file_format: str):
+    if file_format not in ("xls", "xlsx"):
+        bot.send_sticker(
+            message.chat.id,
+            "CAACAgIAAxkBAAIHeGMDlpzna-do-60_q6wwtYVqazPZAAJx9gEAAWOLRgy2C5NzsjO0bCkE",
+        )
+        bot.send_message(
+            message.chat.id, "Загружайте только файл формата .xls или .xlsx"
+        )
+        raise ValueError("Формат файла не .xls или .xlsx")
+
 
 @bot.message_handler(commands=["start"])
 def start_callback(message: telebot.types.Message):
@@ -30,6 +41,7 @@ def document_callback(message: telebot.types.Message):
 
     splited_file_name = file_name.split(".")
     file_format = splited_file_name[-1]
+    validate_file_format(message, file_format)
 
     with open("user_xls_storage/" + file_name, "wb") as new_file:
         new_file.write(downloaded_file)
