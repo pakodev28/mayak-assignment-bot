@@ -17,9 +17,11 @@ logger = logger.get_logger(__name__)
 db = DB()
 
 
-def validate_file_format(message: telebot.types.Message, file_format: str):
+def validate_file_format(message: telebot.types.Message, file_name: str):
     """Валидация формата файла."""
 
+    splited_file_name = file_name.split(".")
+    file_format = splited_file_name[-1]
     if file_format not in ("xls", "xlsx"):
         bot.send_message(
             message.chat.id, "Загружайте только файл формата .xls или .xlsx"
@@ -77,9 +79,7 @@ def document_callback(message: telebot.types.Message):
     file_info = bot.get_file(message.document.file_id)
     downloaded_file = bot.download_file(file_info.file_path)
 
-    splited_file_name = file_name.split(".")
-    file_format = splited_file_name[-1]
-    validate_file_format(message, file_format)
+    validate_file_format(message, file_name)
 
     with open("user_files_storage/" + file_name, "wb") as new_file:
         new_file.write(downloaded_file)
