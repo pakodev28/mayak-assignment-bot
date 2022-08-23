@@ -30,6 +30,22 @@ def validate_file_format(message: telebot.types.Message, file_format: str):
         raise ValueError("Формат файла не .xls или .xlsx")
 
 
+def send_pretty_df(df: pd.core.frame.DataFrame):
+    message = "Данные из вашего файла!"
+    if df.empty == False:
+        for i in range(len(df)):
+            message = (
+                message
+                + "\n\n NAME: "
+                + str((df["NAME"].iloc[i]))
+                + "\n URL: "
+                + str((df["URL"].iloc[i]))
+                + "\n XPATH: "
+                + str((df["XPATH"].iloc[i]))
+            )
+    return message
+
+
 @bot.message_handler(commands=["start"])
 def start_callback(message: telebot.types.Message):
     bot.send_sticker(
@@ -59,7 +75,9 @@ def document_callback(message: telebot.types.Message):
         new_file.write(downloaded_file)
 
     df = pd.read_excel(downloaded_file, header=None, names=["NAME", "URL", "XPATH"])
-    bot.send_message(message.chat.id, df.to_markdown())
+    # bot.send_message(message.chat.id, df.to_string())
+    pretty_df = send_pretty_df(df)
+    bot.send_message(message.chat.id, pretty_df, disable_web_page_preview=True)
 
     try:
         df.to_sql("data_from_users_xls", db.conn, if_exists="append", index=False)
