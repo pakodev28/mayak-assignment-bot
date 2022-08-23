@@ -4,9 +4,8 @@ import pandas as pd
 import telebot
 from dotenv import load_dotenv
 
-from db import DB
 import logger
-
+from db import DB
 
 load_dotenv()
 
@@ -19,6 +18,8 @@ db = DB()
 
 
 def validate_file_format(message: telebot.types.Message, file_format: str):
+    """Валидация формата файла."""
+
     if file_format not in ("xls", "xlsx"):
         bot.send_message(
             message.chat.id, "Загружайте только файл формата .xls или .xlsx"
@@ -31,6 +32,8 @@ def validate_file_format(message: telebot.types.Message, file_format: str):
 
 
 def send_pretty_df(df: pd.core.frame.DataFrame):
+    """Приводит объект pandas.Dataframe в удобочитаемый вид."""
+
     message = "Данные из вашего файла!"
     if df.empty == False:
         for i in range(len(df)):
@@ -48,6 +51,8 @@ def send_pretty_df(df: pd.core.frame.DataFrame):
 
 @bot.message_handler(commands=["start"])
 def start_callback(message: telebot.types.Message):
+    """Обработчик команды /start."""
+
     bot.send_sticker(
         message.chat.id,
         "CAACAgIAAxkBAAIHdmMDg_YLHITGY9_5PnLRA_92qiCvAAJ6AAPluQgavXvp8xtDHoApBA",
@@ -63,6 +68,11 @@ def start_callback(message: telebot.types.Message):
 
 @bot.message_handler(content_types=["document"])
 def document_callback(message: telebot.types.Message):
+    """Обработчик загрузки документа.
+    Сохраняет файл в директорию user_files_storage/.
+    Читает файл и отправляет сожержимое в чат.
+    Записывает содержимое в БД."""
+
     file_name = message.document.file_name
     file_info = bot.get_file(message.document.file_id)
     downloaded_file = bot.download_file(file_info.file_path)
@@ -75,7 +85,6 @@ def document_callback(message: telebot.types.Message):
         new_file.write(downloaded_file)
 
     df = pd.read_excel(downloaded_file, header=None, names=["NAME", "URL", "XPATH"])
-    # bot.send_message(message.chat.id, df.to_string())
     pretty_df = send_pretty_df(df)
     bot.send_message(message.chat.id, pretty_df, disable_web_page_preview=True)
 
