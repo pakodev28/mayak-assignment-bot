@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 
 *.xls
-*.xlsx
+user_files_storage/*.xlsx
 *.db
 *.log
