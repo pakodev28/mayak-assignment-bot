@@ -23,6 +23,3 @@
     ```
     docker container stop <CONTAINER ID> or <container name>
     ```  
-
-
-### @mayak_assignment_bot (пишите если нужно запустить бота)
